@@ -22,18 +22,32 @@ elements.loadMore.addEventListener('click', handlerLoadMore);
 async function handlerSearch(evt) {
   evt.preventDefault();
   elements.gallery.innerHTML = '';
-  searchReaquest = evt.target.searchQuery.value;
+  searchReaquest = evt.target.searchQuery.value.trim();
   try {
     const galleryObj = await fetchPixabay(searchReaquest, page);
+    console.log(galleryObj);
     if (!galleryObj.hits.length) {
-      return Notiflix.Notify.failure(
+      return Notiflix.Notify.info(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+    }
+    if (searchReaquest === '') {
+      return Notiflix.Notify.info('Please enter a query to search for images');
     }
     const markup = galleryMarkup(galleryObj.hits);
     elements.gallery.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
-    elements.loadMore.classList.remove('is-hidden');
+    Notiflix.Notify.success(
+      `Hooray! We found totalHits: ${galleryObj.total} images`,
+      {
+        timeout: 3500,
+      }
+    );
+    if (galleryObj.totalHits < 40) {
+      elements.loadMore.classList.add('is-hidden');
+    } else {
+      elements.loadMore.classList.remove('is-hidden');
+    }
   } catch (error) {
     console.log(error);
   }
@@ -46,19 +60,15 @@ async function handlerLoadMore() {
   try {
     const galleryObj = await fetchPixabay(searchReaquest, page);
     console.log(galleryObj);
-    if (page * 40 >= galleryObj.totalHits) {
+    if (galleryObj.totalHits < page * 40) {
       elements.loadMore.classList.add('is-hidden');
-      Notiflix.Notify.failure(
+      Notiflix.Notify.info(
         'We are sorry, but you have reached the end of search results.',
         {
           timeout: 2000,
         }
       );
     }
-
-    Notiflix.Notify.success(`Total number of images ${galleryObj.totalHits}`, {
-      timeout: 2000,
-    });
     const markup = galleryMarkup(galleryObj.hits);
     elements.gallery.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
@@ -116,5 +126,3 @@ function galleryMarkup(arr) {
     )
     .join('');
 }
-
-// fetchPixabay();
