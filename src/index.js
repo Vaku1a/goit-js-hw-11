@@ -1,5 +1,7 @@
 import axios from 'axios';
 import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
@@ -9,6 +11,7 @@ const elements = {
   loadMore: document.querySelector('.load-more'),
 };
 
+var lightbox = new SimpleLightbox('.gallery a');
 let page = 1;
 let searchReaquest;
 
@@ -29,6 +32,7 @@ async function handlerSearch(evt) {
     }
     const markup = galleryMarkup(galleryObj.hits);
     elements.gallery.insertAdjacentHTML('beforeend', markup);
+    lightbox.refresh();
     elements.loadMore.classList.remove('is-hidden');
   } catch (error) {
     console.log(error);
@@ -41,14 +45,23 @@ async function handlerLoadMore() {
   page += 1;
   try {
     const galleryObj = await fetchPixabay(searchReaquest, page);
-    if (!galleryObj.hits.length) {
+    console.log(galleryObj);
+    if (page * 40 >= galleryObj.totalHits) {
       elements.loadMore.classList.add('is-hidden');
-      return Notiflix.Notify.failure(
-        'We are sorry, but you have reached the end of search results.'
+      Notiflix.Notify.failure(
+        'We are sorry, but you have reached the end of search results.',
+        {
+          timeout: 2000,
+        }
       );
     }
+
+    Notiflix.Notify.success(`Total number of images ${galleryObj.totalHits}`, {
+      timeout: 2000,
+    });
     const markup = galleryMarkup(galleryObj.hits);
     elements.gallery.insertAdjacentHTML('beforeend', markup);
+    lightbox.refresh();
   } catch (error) {
     console.log(error);
   }
@@ -85,16 +98,16 @@ function galleryMarkup(arr) {
             <img src="${webformatURL}" alt="${tags}" loading="lazy" />
             <div class="info">
                 <p class="info-item">
-                <b>${likes}</b>
+                <b>Likes: ${likes}</b>
                 </p>
                 <p class="info-item">
-                <b>${views}</b>
+                <b>Views: ${views}</b>
                 </p>
                 <p class="info-item">
-                <b>${comments}</b>
+                <b>Comments: ${comments}</b>
                 </p>
                 <p class="info-item">
-                <b>${downloads}</b>
+                <b>Downloads: ${downloads}</b>
                 </p>
             </div>
         </div>

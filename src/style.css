@@ -1,3 +1,153 @@
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  flex: 1;
+}
+
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 0px;
+}
+
+input {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  opacity: 0.5;
+  color: #fff;
+}
+
+input::placeholder {
+  font-size: 1em;
+  font-weight: light;
+  opacity: 0.5;
+  color: #fff;
+}
+
+button[type='submit'] {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  opacity: 0.5;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+button[type='submit']:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* .load-more-hidden {
+  display: none;
+} */
+
+.load-more {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  opacity: 0.5;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
 .is-hidden {
   display: none;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.load-more:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 90%;
+  width: 300px;
+  margin: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* .photo-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+} */
+
+.photo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* .photo-card img {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+} */
+
+.info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+.info p {
+  margin: 0;
+  font-size: 1em;
+  color: #333;
+}
+
+.info b {
+  margin: 5px 0;
+  font-size: 0.8em;
+  color: #777;
 }
