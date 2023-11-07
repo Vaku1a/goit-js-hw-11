@@ -1,94 +1,97 @@
-import axios from 'axios';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-
-axios.defaults.baseURL = 'https://pixabay.com/api/';
+import { fetchPixabay } from './api';
 
 const elements = {
   form: document.querySelector('.search-form'),
   gallery: document.querySelector('.gallery'),
-  loadMore: document.querySelector('.load-more'),
+  guard: document.querySelector('.js-guard'),
 };
+
+const options = {
+  root: null,
+  rootMargin: '0px',
+};
+
+const observer = new IntersectionObserver(handlerLoadMore, options);
+observer.observe(elements.guard);
 
 var lightbox = new SimpleLightbox('.gallery a');
 let page = 1;
-let searchReaquest;
+let searchReaquest = '';
 
-elements.loadMore.classList.add('is-hidden');
 elements.form.addEventListener('submit', handlerSearch);
-elements.loadMore.addEventListener('click', handlerLoadMore);
 
 async function handlerSearch(evt) {
   evt.preventDefault();
   elements.gallery.innerHTML = '';
   searchReaquest = evt.target.searchQuery.value.trim();
+
   try {
-    const galleryObj = await fetchPixabay(searchReaquest, page);
-    console.log(galleryObj);
-    if (!galleryObj.hits.length) {
-      return Notiflix.Notify.info(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-    }
-    if (searchReaquest === '') {
-      return Notiflix.Notify.info('Please enter a query to search for images');
-    }
-    const markup = galleryMarkup(galleryObj.hits);
-    elements.gallery.insertAdjacentHTML('beforeend', markup);
-    lightbox.refresh();
-    Notiflix.Notify.success(
-      `Hooray! We found totalHits: ${galleryObj.total} images`,
-      {
-        timeout: 3500,
-      }
-    );
-    if (galleryObj.totalHits < 40) {
-      elements.loadMore.classList.add('is-hidden');
-    } else {
-      elements.loadMore.classList.remove('is-hidden');
-    }
+    const galleryObj = await fetchPixabay(searchReaquest);
+    checkConditions(galleryObj, searchReaquest);
+    createMurkup(galleryObj.hits);
+    msgNotifix(`Hooray! We found totalHits: ${galleryObj.total} images`);
   } catch (error) {
-    console.log(error);
+    errorNotifix(error);
   }
 
   evt.target.reset();
 }
 
-async function handlerLoadMore() {
-  page += 1;
-  try {
-    const galleryObj = await fetchPixabay(searchReaquest, page);
-    console.log(galleryObj);
-    if (galleryObj.totalHits < page * 40) {
-      elements.loadMore.classList.add('is-hidden');
-      Notiflix.Notify.info(
-        'We are sorry, but you have reached the end of search results.',
-        {
-          timeout: 2000,
+async function handlerLoadMore(enteries, observer) {
+  if (!searchReaquest) {
+    return;
+  }
+
+  enteries.forEach(async entry => {
+    if (entry.isIntersecting) {
+      page += 1;
+      try {
+        const galleryObj = await fetchPixabay(searchReaquest, page);
+        if (!galleryObj.hits.length) {
+          msgNotifix(
+            'We are sorry, but you have reached the end of search results.'
+          );
+          return;
         }
-      );
+        createMurkup(galleryObj.hits);
+      } catch (error) {
+        errorNotifix(error);
+      }
     }
-    const markup = galleryMarkup(galleryObj.hits);
-    elements.gallery.insertAdjacentHTML('beforeend', markup);
-    lightbox.refresh();
-  } catch (error) {
-    console.log(error);
+  });
+}
+
+function createMurkup(arr) {
+  elements.gallery.insertAdjacentHTML('beforeend', galleryMarkup(arr));
+  lightbox.refresh();
+}
+
+function checkConditions(obj, str) {
+  if (!obj.hits.length) {
+    msgNotifix(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+  }
+
+  if (str === '') {
+    msgNotifix('Please enter a query to search for images');
   }
 }
 
-async function fetchPixabay(searchQuery, page) {
-  const params = new URLSearchParams({
-    key: '40494602-0a0e88287e0fb8b14fa37c335',
-    q: searchQuery,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: true,
-    per_page: 40,
-    page,
+function msgNotifix(info) {
+  return Notiflix.Notify.info(info, {
+    timeout: 3500,
   });
-  const response = await axios.get(`?${params}`);
-  return response.data;
+}
+
+function errorNotifix(info) {
+  console.log(info);
+  return Notiflix.Notify.failure(info, {
+    timeout: 6000,
+  });
 }
 
 function galleryMarkup(arr) {
